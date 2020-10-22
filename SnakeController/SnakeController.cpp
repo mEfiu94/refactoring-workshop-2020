@@ -62,7 +62,27 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
         throw ConfigurationError();
     }
 }
-
+bool Controller::detectLostGame(Segment &newHead)
+{
+    bool lost = false;
+    for (auto segment : m_segments)
+    {
+        if (segment.x == newHead.x and segment.y == newHead.y)
+        {
+            m_scorePort.send(std::make_unique<EventT<LooseInd>>());
+            lost = true;
+            break;
+        }
+    }
+    if (newHead.x < 0 or newHead.y < 0 or
+        newHead.x >= m_mapDimension.first or
+        newHead.y >= m_mapDimension.second)
+    {
+        m_scorePort.send(std::make_unique<EventT<LooseInd>>());
+        lost = true;
+    }
+    return lost;
+}
 void Controller::receive(std::unique_ptr<Event> e)
 {
     try {
@@ -75,25 +95,11 @@ void Controller::receive(std::unique_ptr<Event> e)
         newHead.y = currentHead.y + (not (m_currentDirection & 0b01) ? (m_currentDirection & 0b10) ? 1 : -1 : 0);
         newHead.ttl = currentHead.ttl;
 
-        bool lost = false;
-
-        for (auto segment : m_segments) {
-            if (segment.x == newHead.x and segment.y == newHead.y) {
-                m_scorePort.send(std::make_unique<EventT<LooseInd>>());
-                lost = true;
-                break;
-            }
-        }
-
+        bool lost = detectLostGame(newHead);
         if (not lost) {
             if (std::make_pair(newHead.x, newHead.y) == m_foodPosition) {
                 m_scorePort.send(std::make_unique<EventT<ScoreInd>>());
-                m_foodPort.send(std::make_unique<EventT<FoodReq>>());
-            } else if (newHead.x < 0 or newHead.y < 0 or
-                       newHead.x >= m_mapDimension.first or
-                       newHead.y >= m_mapDimension.second) {
-                m_scorePort.send(std::make_unique<EventT<LooseInd>>());
-                lost = true;
+                m_foodPort.send(std::make_unique<EventT<FoodReq>>());             
             } else {
                 for (auto &segment : m_segments) {
                     if (not --segment.ttl) {
@@ -101,7 +107,6 @@ void Controller::receive(std::unique_ptr<Event> e)
                         l_evt.x = segment.x;
                         l_evt.y = segment.y;
                         l_evt.value = Cell_FREE;
-
                         m_displayPort.send(std::make_unique<EventT<DisplayInd>>(l_evt));
                     }
                 }
