@@ -45,7 +45,8 @@ private:
     std::pair<int, int> m_mapDimension;
     std::pair<int, int> m_foodPosition;
 
-    bool detectLostGame(Segment &newHead);
+    bool detectLostGame(const Segment &newHead);
+    void displayChangedPosition(const Segment &newHead);
     Direction m_currentDirection;
     std::list<Segment> m_segments;
 };
