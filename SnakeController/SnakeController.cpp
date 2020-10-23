@@ -20,7 +20,8 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
     : m_displayPort(p_displayPort),
       m_foodPort(p_foodPort),
       m_scorePort(p_scorePort),
-      m_paused(false)
+      m_paused(false),
+      m_world(0,0)
 {
     std::istringstream istr(p_config);
     char w, f, s, d;
@@ -29,8 +30,8 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
     int foodX, foodY;
     istr >> w >> width >> height >> f >> foodX >> foodY >> s;
 
-    if (w == 'W' and f == 'F' and s == 'S') {
-        m_mapDimension = std::make_pair(width, height);
+    if (w == 'W' and f == 'F' and s == 'S') {        
+        m_world.setWorldSize(width, height);
         m_foodPosition = std::make_pair(foodX, foodY);
 
         istr >> d;
@@ -70,7 +71,7 @@ bool Controller::isSegmentAtPosition(int x, int y) const
 
 bool Controller::isPositionOutsideMap(int x, int y) const
 {
-    return x < 0 or y < 0 or x >= m_mapDimension.first or y >= m_mapDimension.second;
+    return x < 0 or y < 0 or x >= m_world.getWidth() or y >= m_world.getHeight();
 }
 
 void Controller::sendPlaceNewFood(int x, int y)

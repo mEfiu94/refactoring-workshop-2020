@@ -6,7 +6,7 @@
 
 #include "IEventHandler.hpp"
 #include "SnakeInterface.hpp"
-
+#include "../World/World.hpp"
 class Event;
 class IPort;
 
@@ -37,7 +37,6 @@ private:
     IPort& m_foodPort;
     IPort& m_scorePort;
 
-    std::pair<int, int> m_mapDimension;
     std::pair<int, int> m_foodPosition;
 
     struct Segment
@@ -69,6 +68,7 @@ private:
     void sendPlaceNewFood(int x, int y);
 
     bool m_paused;
+    World m_world;
 };
 
 } // namespace Snake
