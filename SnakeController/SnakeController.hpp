@@ -7,6 +7,7 @@
 #include "IEventHandler.hpp"
 #include "SnakeInterface.hpp"
 #include "../World/World.hpp"
+#include "../Food/Food.hpp"
 class Event;
 class IPort;
 
@@ -67,6 +68,7 @@ private:
 
     bool m_paused;
     World m_world;
+    Food m_food;
 };
 
 } // namespace Snake
