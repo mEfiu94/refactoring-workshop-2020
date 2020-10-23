@@ -9,6 +9,9 @@ public:
         width=newWidth;
         height=newHeight;
     }
+    bool isPositionOutsideMap(int x, int y)const{
+        return x < 0 or y < 0 or x >= width or y >= height;
+    }
 private:
     int width=0;
     int height=0;

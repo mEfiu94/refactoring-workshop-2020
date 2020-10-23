@@ -69,11 +69,6 @@ bool Controller::isSegmentAtPosition(int x, int y) const
         [x, y](auto const& segment){ return segment.x == x and segment.y == y; });
 }
 
-bool Controller::isPositionOutsideMap(int x, int y) const
-{
-    return x < 0 or y < 0 or x >= m_world.getWidth() or y >= m_world.getHeight();
-}
-
 void Controller::sendPlaceNewFood(int x, int y)
 {
     m_foodPosition = std::make_pair(x, y);
@@ -168,7 +163,7 @@ void Controller::removeTailSegmentIfNotScored(Segment const& newHead)
 
 void Controller::updateSegmentsIfSuccessfullMove(Segment const& newHead)
 {
-    if (isSegmentAtPosition(newHead.x, newHead.y) or isPositionOutsideMap(newHead.x, newHead.y)) {
+    if (isSegmentAtPosition(newHead.x, newHead.y) or m_world.isPositionOutsideMap(newHead.x, newHead.y)) {
         m_scorePort.send(std::make_unique<EventT<LooseInd>>());
     } else {
         addHeadSegment(newHead);
@@ -192,7 +187,7 @@ void Controller::handleDirectionInd(std::unique_ptr<Event> e)
 
 void Controller::updateFoodPosition(int x, int y, std::function<void()> clearPolicy)
 {
-    if (isSegmentAtPosition(x, y) || isPositionOutsideMap(x,y)) {
+    if (isSegmentAtPosition(x, y) || m_world.isPositionOutsideMap(x,y)) {
         m_foodPort.send(std::make_unique<EventT<FoodReq>>());
         return;
     }
